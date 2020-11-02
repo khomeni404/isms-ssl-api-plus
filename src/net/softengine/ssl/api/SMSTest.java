@@ -18,9 +18,8 @@ import java.util.List;
  */
 public class SMSTest {
 
-    public static final String USERNAME = "mak";
-    public static final String PASSWORD = "mak123";
-    public static final String SID = "mak";
+    public static final String API_TOKEN = "QRFBRAND-41a6f43c-31f9-4965-a84a-17d77facff1d";
+    public static final String SID = "QRFBRAND";
 
     public static void main(String[] args) {
         List<String> cells = new ArrayList<String>(
@@ -31,7 +30,7 @@ public class SMSTest {
     }
 
     public static void sendSMS(RequestedMethod method, List<String> cells, String text) {
-        SMSClient client = new SMSClient(USERNAME, PASSWORD, SID);
+        SMSClient client = new SMSClient(API_TOKEN, SID);
         ReplyResult result = client.sendSMS(method, cells, text);
         System.out.println(result.getLogin());
         System.out.println(result.getMessage());
