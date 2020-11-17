@@ -85,7 +85,7 @@ public class HTTPSMSClient {
 
         HttpResponse response = client.execute(request);
 
-        System.out.println("\nSending 'GET' request to URL : " + url);
+        System.out.println("\nSending 'GET' request to ROOT_URL : " + url);
         System.out.println("Response Code : " +
                 response.getStatusLine().getStatusCode());
 
@@ -125,7 +125,7 @@ public class HTTPSMSClient {
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
 
         HttpResponse response = client.execute(post);
-        System.out.println("\nSending 'POST' request to URL : " + url);
+        System.out.println("\nSending 'POST' request to ROOT_URL : " + url);
         System.out.println("Post parameters : " + post.getEntity());
         System.out.println("Response Code : " +
                 response.getStatusLine().getStatusCode());

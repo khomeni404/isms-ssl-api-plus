@@ -1,5 +1,7 @@
 package net.softengine.ssl.api;
 
+import org.json.JSONObject;
+
 /**
  * Copyright &copy; Soft Engine
  * <p/>
@@ -19,6 +21,18 @@ public class SMSInfo {
     private String  csmSid;
     private String  referenceId;
     private String  msiSdnStatus;
+    private String  smsType;
+
+    public static SMSInfo toSMSInfo(JSONObject jo) {
+        SMSInfo i = new SMSInfo();
+        i.setMsiSdnStatus((String) jo.get("sms_status"));
+        i.setMsiSdn((String) jo.get("msisdn"));
+        i.setCsmSid((String) jo.get("csms_id"));
+        i.setReferenceId((String) jo.get("reference_id"));
+        i.setSmsText((String) jo.get("sms_body"));
+        i.setSmsType((String) jo.get("sms_type"));
+        return i;
+    }
 
 
     public String getMsiSdn() {
@@ -59,5 +73,13 @@ public class SMSInfo {
 
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+    }
+
+    public String getSmsType() {
+        return smsType;
+    }
+
+    public void setSmsType(String smsType) {
+        this.smsType = smsType;
     }
 }

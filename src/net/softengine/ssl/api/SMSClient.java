@@ -2,23 +2,14 @@ package net.softengine.ssl.api;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+
+import java.net.URL;
+import java.util.*;
 
 import net.softengine.ssl.util.IDGenerator;
-import net.softengine.ssl.util.XmlUtil;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -34,32 +25,29 @@ import org.json.JSONObject;
  * ------------------
  */
 public class SMSClient {
+    private static final String USER_AGENT = "Chrome/41.0.2228.0"; // "Mozilla/5.0";
+    private static final String ROOT_URL = "https://smsplus.sslwireless.com/api/v3/send-sms";
+    private static final int BUNDLE_LIMIT = 100;
+    private static final String API_STATUS_SUCCESS = "SUCCESS";
+    private static final String API_STATUS_FAILED = "FAILED";
+    private static String apiToken;
+    private static String sid;
 
     public static void main(String[] args) throws Exception {
+        Map<String, String> messageMap = new HashMap<>();
+        messageMap.put("01717659287", "Dynamic SMS 1");
+        messageMap.put("01945544306", "Dynamic SMS 2");
+        List<String> cellsBulk = Arrays.asList("01717659287", "01945544306");
 
-        SMSClient http = new SMSClient();
 
-        System.out.println("Testing 1 - Send Http GET request");
-        // http.sendGet();
-
-        System.out.println("\nTesting 2 - Send Http POST request");
-        //http.sendPost();
+        SMSClient client = new SMSClient(SMSTest.API_TOKEN, SMSTest.SID);
+        client.sendSMS(messageMap);
+        ReplyResult replyResult = client.sendSMS("01717659287", "This is Single SMS");
+        System.out.println("replyResult = " + replyResult);
+        client.sendSMS(cellsBulk, "This is Bulk SMS");
 
     }
 
-    // https://smsplus.sslwireless.com/api/v3/send-sms?api_token=QRFBRAND-41a6f43c-31f9-4965-a84a-17d77facff1d&sid=QRFBRAND&sms=TestSMS&msisdn=8801717659287&csms_id=54545454
-    // api_token=QRFBRAND-41a6f43c-31f9-4965-a84a-17d77facff1d&
-// sid=QRFBRAND&
-// sms=TestSMS&
-// msisdn=8801717659287&
-// csms_id=54545454
-    private static final String USER_AGENT = "Chrome/41.0.2228.0"; // "Mozilla/5.0";
-    private static final String URL = "https://smsplus.sslwireless.com/api/v3/send-sms";
-    //    private static final String URL = "http://172.75.75.2/pushapi/dynamic/server.php";
-    private static final int BUNDLE_LIMIT = 2;
-
-    public static String apiToken;
-    public static String sid;
 
     public SMSClient() {
     }
@@ -70,43 +58,116 @@ public class SMSClient {
     }
 
 
-    public ReplyResult sendSMS(RequestedMethod method, List<String> cells, String text) {
+    // Single SMS
+    public ReplyResult sendSMS(String cell, String text) {
+        return sendSMS(Arrays.asList(cell), text);
+    }
+
+    // Bulk SMS
+    public ReplyResult sendSMS(List<String> cells, String text) {
         ReplyResult result = new ReplyResult();
-        List<SMSInfo> smsInfoList = new ArrayList<SMSInfo>();
-        int subListCounter = 1;
         try {
-            if (method == RequestedMethod.POST) {
-                int start, end;
-                int total = cells.size();
-                for (int i = 0; i < total; i += BUNDLE_LIMIT) {
-                    start = i;
-                    end = i + BUNDLE_LIMIT;
-                    List<String> subList = cells.subList(start, end > total ? total : end);
-                    System.out.println("subList = " + subList);
-                    //ReplyResult replyResult = sendPost(subList, text);
-                    ReplyResult replyResult = sendPostJSON(subList, text);
+            URL bulkURL = new URL(SMSClient.ROOT_URL + "/bulk");
+            URL singleURL = new URL(SMSClient.ROOT_URL);
+            IDGenerator csmSID = new IDGenerator();
+
+            List<SMSInfo> smsInfoList = new ArrayList<SMSInfo>();
+            int subListCounter = 1;
+            int start, end;
+            int total = cells.size();
+            for (int i = 0; i < total; i += BUNDLE_LIMIT) {
+                start = i;
+                end = i + BUNDLE_LIMIT;
+                List<String> subList = cells.subList(start, end > total ? total : end);
+                System.out.println("subList = " + subList);
+
+                if(subList.get(0) != null){
+                    ReplyResult replyResult;
+                    JSONObject parent = new JSONObject();
+                    parent.put("api_token", apiToken);
+                    parent.put("sid", sid);
+                    parent.put("sms", text);
+
+                    if (subList.size() > 1) { // Bulk SMS
+                        Set<String> cellSet = new HashSet<>(subList);
+                        JSONArray cellArray = new JSONArray(cellSet);
+                        parent.put("msisdn", cellArray);
+                        parent.put("batch_csms_id", csmSID.generate());
+                        replyResult = sendPost(bulkURL, parent);
+                    } else { // Single SMS
+                        parent.put("msisdn", subList.get(0));
+                        parent.put("csms_id", csmSID.generate());
+                        replyResult = sendPost(singleURL, parent);
+                    }
 
                     if (subListCounter <= 1) {
                         result = replyResult;
                         smsInfoList.addAll(result.getSmsInfoList());
+                        result.setMessage(result.getMessage());
                     } else {
                         smsInfoList.addAll(replyResult.getSmsInfoList());
+                        result.setMessage(replyResult.getMessage());
                     }
                     subListCounter++;
                 }
-                result.setSuccess(true);
-                result.setMessage("Request sent successfully");
-                result.setSmsInfoList(smsInfoList);
-                return result;
-            } else if (method == RequestedMethod.GET) {
-                result.setSuccess(false);
-                result.setMessage("GET Method not allowed here.");
-                return result;
-            } else {
-                result.setSuccess(false);
-                result.setMessage("No POST/GET method found !");
-                return result;
             }
+            result.setSuccess(true);
+            result.setSmsInfoList(smsInfoList);
+
+        } catch (Exception e) {
+            result.setSuccess(false);
+            result.setMessage("Unable to connect" + e.getMessage() + "\nPlease check your internet connection.");
+        }
+        return result;
+    }
+
+    // Dynamic SMS
+    public ReplyResult sendSMS(Map<String, String> messageMap) {
+        ReplyResult result = new ReplyResult();
+        try {
+            URL url = new URL(SMSClient.ROOT_URL + "/dynamic");
+            JSONObject parent = new JSONObject();
+            IDGenerator csmSID = new IDGenerator();
+            List<JSONObject> cells = new ArrayList<>();
+            for (Map.Entry<String, String> entry : messageMap.entrySet()) {
+                JSONObject msg = new JSONObject();
+                msg.put("text", entry.getValue());
+                msg.put("msisdn", entry.getKey());
+                msg.put("csms_id", csmSID.generate());
+                cells.add(msg);
+            }
+
+
+            List<SMSInfo> smsInfoList = new ArrayList<>();
+            int subListCounter = 1;
+
+            int start, end;
+            int total = cells.size();
+            for (int i = 0; i < total; i += BUNDLE_LIMIT) {
+                start = i;
+                end = i + BUNDLE_LIMIT;
+                List<JSONObject> subList = cells.subList(start, end > total ? total : end);
+                System.out.println("subList = " + subList);
+
+                JSONArray msisdn = new JSONArray(subList);
+                parent.put("api_token", apiToken);
+                parent.put("sid", sid);
+                parent.put("sms", msisdn);
+
+                ReplyResult replyResult = sendPost(url, parent);
+
+                if (subListCounter <= 1) {
+                    result = replyResult;
+                    smsInfoList.addAll(result.getSmsInfoList());
+                } else {
+                    smsInfoList.addAll(replyResult.getSmsInfoList());
+                }
+                subListCounter++;
+            }
+            result.setSuccess(true);
+            result.setMessage("Request sent successfully");
+            result.setSmsInfoList(smsInfoList);
+            return result;
         } catch (Exception e) {
             result.setSuccess(false);
             result.setMessage("Unable to connect" + e.getMessage() + "\nPlease check your internet connection.");
@@ -115,112 +176,62 @@ public class SMSClient {
     }
 
 
-    // HTTP GET request
-    private static void sendGet() throws Exception {
+    private static ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
 
-        String url = "http://sms.sslwireless.com/pushapi/dynamic/server.php" +
-                "?user=mak" +
-                "&pass=mak123" +
-                "&sms[0][0]=8801717659287" +
-                "&sms[0][1]=HelloSSL" +
-                "&sms[0][2]=12345678954" +
-                "&sid=mak";
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
+        con.setRequestMethod(RequestedMethod.POST.name());
 
-        HttpClient client = new DefaultHttpClient();
-        HttpGet request = new HttpGet(url);
+        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+        wr.write(parent.toString());
+        wr.flush();
 
-        // add request header
-        request.addHeader("User-Agent", USER_AGENT);
-
-        HttpResponse response = client.execute(request);
-
-        System.out.println("\nSending 'GET' request to URL : " + url);
-        System.out.println("Response Code : " +
-                response.getStatusLine().getStatusCode());
-
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-
-        StringBuffer result = new StringBuffer();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            result.append(line);
-        }
-        XmlUtil.readStringXML(result.toString());
-        //System.out.println(result.toString());
-
-    }
-
-    // HTTP POST request
-    private static ReplyResult sendPostJSON(List<String> cells, String text) throws Exception {
-        /*HttpClient httpClient = new DefaultHttpClient(); // HttpClientBuilder.create().build();
-        try {
-            HttpPost request = new HttpPost(URL);
-            StringEntity params = new StringEntity("{ \"api_token\": \"" + apiToken + "\", \"sid\": \"" + sid + "\", \"msisdn\": [ \"01717659287\", \"01945544306\" ], \"sms\": \"Message Body 1\", \"batch_csms_id\": \"4437343343P3Z684333392\" }");
-            request.addHeader("content-type", "application/json");
-            request.setEntity(params);
-            HttpResponse response = httpClient.execute(request);
-
-            System.out.println("\nSending 'POST' request to URL : " + URL);
-            // System.out.println("Post parameters : " + post.getEntity());
-            System.out.println("Response Code : " +
-                    response.getStatusLine().getStatusCode());
-
-            BufferedReader rd = new BufferedReader(
-                    new InputStreamReader(response.getEntity().getContent()));
-
-            StringBuffer bufferResult = new StringBuffer();
-            String line = "";
-            while ((line = rd.readLine()) != null) {
-                bufferResult.append(line);
+        //display what returns the POST request
+        ReplyResult replyResult = new ReplyResult();
+        StringBuilder sb = new StringBuilder();
+        int HttpResult = con.getResponseCode();
+        if (HttpResult == HttpURLConnection.HTTP_OK) {
+            BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), "UTF-8")
+            );
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line + "\n");
             }
-            return XmlUtil.generateActionResult(bufferResult.toString());
-        } catch (Exception ex) {
-        } finally {
+            br.close();
 
-        }*/
-
-        JSONObject json = new JSONObject();
-        json.put("api_token", apiToken);
-        json.put("sid", sid);
-        json.put("msisdn", "01717659287");
-        json.put("sms", "Message Body 2");
-        json.put("csms_id", "4473433434pZ684333392");
-
-//        HttpClient httpClient = new DefaultHttpClient();
-         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-
-        try {
-            HttpPost request = new HttpPost(URL);
-            StringEntity params = new StringEntity(json.toString());
-            request.addHeader("content-type", "application/json");
-            request.setEntity(params);
-            HttpResponse response =   httpClient.execute(request);
-            System.out.println("\nSending 'POST' request to URL : " + URL);
-            System.out.println("Response Code : " +
-                    response.getStatusLine().getStatusCode());
-
-            BufferedReader rd = new BufferedReader(
-                    new InputStreamReader(response.getEntity().getContent()));
-
-            StringBuffer bufferResult = new StringBuffer();
-            String line = "";
-            while ((line = rd.readLine()) != null) {
-                bufferResult.append(line);
+            JSONObject json = new JSONObject(sb.toString());
+            String status = (String) json.get("status");
+            Integer status_code = (Integer) json.get("status_code");
+            if (API_STATUS_SUCCESS.equals(status)) {
+                List<SMSInfo> smsInfoList = new ArrayList<>();
+                JSONArray jsonArray =   (JSONArray)json.get("smsinfo");
+                for (int i = 0; i< jsonArray.length(); i++) {
+                    JSONObject jo = (JSONObject) jsonArray.get(i);
+                    smsInfoList.add(SMSInfo.toSMSInfo(jo));
+                }
+                replyResult.setSmsInfoList(smsInfoList);
             }
-            return XmlUtil.generateActionResult(bufferResult.toString());
-        } catch (Exception ex) {
-            // handle exception here
-        } finally {
-            // httpClient.close();
+            replyResult.setSuccess(API_STATUS_SUCCESS.equals(status));
+            replyResult.setMessage("Status Code: " + StatusCode.API_STATUS_CODE_MAP.get(status_code));
+
+            System.out.println("" + sb.toString());
+        } else {
+            replyResult.setSuccess(false);
+            replyResult.setMessage("Response Code: " + HttpResult);
         }
 
-        return null;
+        return replyResult;
     }
 
+
+   /* @Deprecated
     private static ReplyResult sendPost(List<String> cells, String text) throws Exception {
         HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(URL);
+        HttpPost post = new HttpPost(ROOT_URL);
         String charset = "UTF-8";
         post.setHeader("User-Agent", USER_AGENT); // add header
 
@@ -241,7 +252,7 @@ public class SMSClient {
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
 
         HttpResponse response = client.execute(post);
-        System.out.println("\nSending 'POST' request to URL : " + URL);
+        System.out.println("\nSending 'POST' request to ROOT_URL : " + ROOT_URL);
         System.out.println("Post parameters : " + post.getEntity());
         System.out.println("Response Code : " +
                 response.getStatusLine().getStatusCode());
@@ -256,7 +267,6 @@ public class SMSClient {
         }
         return XmlUtil.generateActionResult(bufferResult.toString());
 
-
-    }
+    }*/
 
 }

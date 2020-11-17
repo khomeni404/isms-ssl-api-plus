@@ -2,6 +2,7 @@ package net.softengine.ssl.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; Soft Engine
@@ -27,6 +28,19 @@ public class ReplyResult {
     private List<SMSInfo> smsInfoList = new ArrayList<SMSInfo>(0);
 
     private String message;
+
+
+   /* public ReplyResult toReplyResult() {
+        ReplyResult r = new ReplyResult();
+        r.setSuccess("SUCCESS".equals(status));
+        r.setMessage("Status Code: " + status_code);
+        try {
+            r.setSmsInfoList(smsInfoList.stream().map(SMSInfoJSON::toSMSInfo).collect(Collectors.toList()));
+        } catch (Exception e) {
+
+        }
+        return r;
+    }*/
 
     public boolean isSuccess() {
         return success;
