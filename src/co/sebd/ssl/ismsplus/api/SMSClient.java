@@ -42,10 +42,10 @@ public class SMSClient {
 
 
         SMSClient client = new SMSClient(SMSTest.API_TOKEN, SMSTest.SID);
-//        client.sendSMS(messageMap);
-        ReplyResult replyResult = client.sendSMS("01717659287", "This is Single SMS");
+        // ReplyResult replyResult =  client.sendSMS(messageMap);
+        ReplyResult replyResult = client.sendSMS("01945544306", "This is Single SMS to BL");
+//        ReplyResult replyResult = client.sendSMS(cellsBulk, "This is Bulk SMS");
         System.out.println("replyResult = " + replyResult);
-//        client.sendSMS(cellsBulk, "This is Bulk SMS");
 
     }
 
@@ -175,7 +175,6 @@ public class SMSClient {
             return result;
         }
     }
-
 
     private static ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
 

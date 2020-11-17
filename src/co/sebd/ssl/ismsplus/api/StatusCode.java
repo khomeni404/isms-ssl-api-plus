@@ -18,6 +18,7 @@ import java.util.Map;
 public interface StatusCode {
 
     Map<Integer, String> API_STATUS_CODE_MAP = new HashMap<Integer, String>() {{
+        put(200, "Successfully Sent Request");
         put(4001, "Unauthorized");
         put(4002, "SID/Stakeholder is not permitted");
         put(4003, "IP Blacklisted");

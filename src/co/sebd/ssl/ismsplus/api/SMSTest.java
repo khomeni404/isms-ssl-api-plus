@@ -16,8 +16,9 @@ import java.util.*;
  */
 public class SMSTest {
 
-    public static final String API_TOKEN = "QRFBRAND-31f9-4965-a84a-17d77facff1d-41a6f43c";
-    public static final String SID = "QRFBRAND";
+    public static final String API_TOKEN = "35498629-2dc2-4ef8-920a-8aecace2a35f";
+    public static final String SID = "ISCOOLBELLBRAND";
+    public static final String SID_SE = "SOFTENGINEBRAND";
 
 
     public static void main(String[] args) {
