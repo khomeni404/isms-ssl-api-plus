@@ -1,8 +1,7 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Copyright &copy; Soft Engine

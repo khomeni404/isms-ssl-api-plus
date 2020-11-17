@@ -1,4 +1,4 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
 import org.json.JSONObject;
 

@@ -1,12 +1,12 @@
-package net.softengine.ssl.util;
+package co.sebd.ssl.ismsplus.util;
 
 import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import net.softengine.ssl.api.ReplyResult;
-import net.softengine.ssl.api.SMSInfo;
+import co.sebd.ssl.ismsplus.api.ReplyResult;
+import co.sebd.ssl.ismsplus.api.SMSInfo;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

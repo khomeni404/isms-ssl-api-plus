@@ -1,4 +1,4 @@
-package net.softengine.ssl.util;
+package co.sebd.ssl.ismsplus.util;
 
 import java.io.File;
 import javax.xml.parsers.DocumentBuilderFactory;

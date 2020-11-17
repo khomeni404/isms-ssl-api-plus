@@ -1,4 +1,4 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,8 +8,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 
-import net.softengine.ssl.util.IDGenerator;
+import co.sebd.ssl.ismsplus.util.IDGenerator;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -41,10 +42,10 @@ public class SMSClient {
 
 
         SMSClient client = new SMSClient(SMSTest.API_TOKEN, SMSTest.SID);
-        client.sendSMS(messageMap);
+//        client.sendSMS(messageMap);
         ReplyResult replyResult = client.sendSMS("01717659287", "This is Single SMS");
         System.out.println("replyResult = " + replyResult);
-        client.sendSMS(cellsBulk, "This is Bulk SMS");
+//        client.sendSMS(cellsBulk, "This is Bulk SMS");
 
     }
 
@@ -81,7 +82,7 @@ public class SMSClient {
                 List<String> subList = cells.subList(start, end > total ? total : end);
                 System.out.println("subList = " + subList);
 
-                if(subList.get(0) != null){
+                if (subList.get(0) != null) {
                     ReplyResult replyResult;
                     JSONObject parent = new JSONObject();
                     parent.put("api_token", apiToken);
@@ -206,15 +207,19 @@ public class SMSClient {
             JSONObject json = new JSONObject(sb.toString());
             String status = (String) json.get("status");
             Integer status_code = (Integer) json.get("status_code");
-            if (API_STATUS_SUCCESS.equals(status)) {
-                List<SMSInfo> smsInfoList = new ArrayList<>();
-                JSONArray jsonArray =   (JSONArray)json.get("smsinfo");
-                for (int i = 0; i< jsonArray.length(); i++) {
+
+            List<SMSInfo> smsInfoList = new ArrayList<>();
+            try {
+                JSONArray jsonArray = (JSONArray) json.get("smsinfo");
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jo = (JSONObject) jsonArray.get(i);
                     smsInfoList.add(SMSInfo.toSMSInfo(jo));
                 }
                 replyResult.setSmsInfoList(smsInfoList);
+            } catch (JSONException e) {
+
             }
+
             replyResult.setSuccess(API_STATUS_SUCCESS.equals(status));
             replyResult.setMessage("Status Code: " + StatusCode.API_STATUS_CODE_MAP.get(status_code));
 

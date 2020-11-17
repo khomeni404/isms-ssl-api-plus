@@ -1,4 +1,4 @@
-package net.softengine.ssl.util;
+package co.sebd.ssl.ismsplus.util;
 
 /**
  * Copyright &copy; Soft Engine Inc.

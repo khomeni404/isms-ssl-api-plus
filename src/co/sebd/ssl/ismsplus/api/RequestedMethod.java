@@ -1,4 +1,4 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
 /**
  * Created by MAK on 25/01/16.

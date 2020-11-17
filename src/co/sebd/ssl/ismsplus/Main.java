@@ -1,4 +1,4 @@
-package net.softengine.ssl;
+package co.sebd.ssl.ismsplus;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

@@ -1,4 +1,4 @@
-package net.softengine.ssl.test;
+package co.sebd.ssl.ismsplus.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

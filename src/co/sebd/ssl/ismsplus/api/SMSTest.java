@@ -1,12 +1,5 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -23,7 +16,7 @@ import java.util.*;
  */
 public class SMSTest {
 
-    public static final String API_TOKEN = "QRFBRAND-41a6f43c-31f9-4965-a84a-17d77facff1d";
+    public static final String API_TOKEN = "QRFBRAND-31f9-4965-a84a-17d77facff1d-41a6f43c";
     public static final String SID = "QRFBRAND";
 
 

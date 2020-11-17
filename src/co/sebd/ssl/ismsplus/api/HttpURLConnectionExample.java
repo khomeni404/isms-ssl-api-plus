@@ -1,4 +1,4 @@
-package net.softengine.ssl.api;
+package co.sebd.ssl.ismsplus.api;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

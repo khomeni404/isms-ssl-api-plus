@@ -1,6 +1,6 @@
-package net.softengine.ssl.test;
+package co.sebd.ssl.ismsplus.test;
 
-import net.softengine.ssl.util.XmlUtil;
+import co.sebd.ssl.ismsplus.util.XmlUtil;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
