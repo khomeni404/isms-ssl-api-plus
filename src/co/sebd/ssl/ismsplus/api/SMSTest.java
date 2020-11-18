@@ -16,9 +16,9 @@ import java.util.*;
  */
 public class SMSTest {
 
-    public static final String API_TOKEN = "35498629-2dc2-4ef8-920a-8aecace2a35f";
-    public static final String SID = "ISCOOLBELLBRAND";
-    public static final String SID_SE = "SOFTENGINEBRAND";
+    public static final String API_TOKEN = "35498629-2dc235f";
+    public static final String SID = "";
+    public static final String SID_SE = "";
 
 
     public static void main(String[] args) {
