@@ -123,7 +123,7 @@ public class SMSClient {
     }
 
     // Dynamic SMS
-    public ReplyResult sendSMS(Map<String, String> messageMap) {
+    public ReplyResult sendSMS(Map<String, String> messageMap, String signature) {
         ReplyResult result = new ReplyResult();
         try {
             URL url = new URL(SMSClient.ROOT_URL + "/dynamic");
@@ -132,8 +132,8 @@ public class SMSClient {
             List<JSONObject> cells = new ArrayList<>();
             for (Map.Entry<String, String> entry : messageMap.entrySet()) {
                 JSONObject msg = new JSONObject();
-                msg.put("text", entry.getValue());
                 msg.put("msisdn", entry.getKey());
+                msg.put("text", entry.getValue() + (signature == null ? "" : ("\n"+signature)));
                 msg.put("csms_id", csmSID.generate());
                 cells.add(msg);
             }
