@@ -26,32 +26,13 @@ import org.json.JSONObject;
  * ------------------
  */
 public class SMSClient {
-    private static final String USER_AGENT = "Chrome/41.0.2228.0"; // "Mozilla/5.0";
+
     private static final String ROOT_URL = "https://smsplus.sslwireless.com/api/v3/send-sms";
     private static final int BUNDLE_LIMIT = 100;
     private static final String API_STATUS_SUCCESS = "SUCCESS";
     private static final String API_STATUS_FAILED = "FAILED";
     private static String apiToken;
     private static String sid;
-
-    public static void main(String[] args) throws Exception {
-        Map<String, String> messageMap = new HashMap<>();
-        messageMap.put("01717659287", "Dynamic SMS 1");
-        messageMap.put("01945544306", "Dynamic SMS 2");
-        List<String> cellsBulk = Arrays.asList("01717659287", "01945544306");
-
-
-        SMSClient client = new SMSClient(SMSTest.API_TOKEN, SMSTest.SID);
-        // ReplyResult replyResult =  client.sendSMS(messageMap);
-        ReplyResult replyResult = client.sendSMS("01945544306", "This is Single SMS to BL");
-//        ReplyResult replyResult = client.sendSMS(cellsBulk, "This is Bulk SMS");
-        System.out.println("replyResult = " + replyResult);
-
-    }
-
-
-    public SMSClient() {
-    }
 
     public SMSClient(String apiToken, String sid) {
         SMSClient.apiToken = apiToken;
@@ -122,7 +103,12 @@ public class SMSClient {
         return result;
     }
 
-    // Dynamic SMS
+    // Dynamic SMS : Without Signature
+    public ReplyResult sendSMS(Map<String, String> messageMap) {
+        return sendSMS(messageMap, null);
+    }
+
+    // Dynamic SMS : With Signature
     public ReplyResult sendSMS(Map<String, String> messageMap, String signature) {
         ReplyResult result = new ReplyResult();
         try {
@@ -176,6 +162,9 @@ public class SMSClient {
         }
     }
 
+
+
+    // Posting Request
     private static ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

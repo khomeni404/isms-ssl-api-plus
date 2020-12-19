@@ -34,13 +34,13 @@ public class IDGenerator {
 
     public synchronized String generate() {
         String dateNow = DateUtil.getCurrentDate();
-        Date curDate = null;
+        Date curDate;
         try {
             curDate = DateUtil.toDate(dateNow);
         } catch (ParseException e) {
             return null;
         }
-        String id = null;
+        String id;
         String randomTime = Long.toString(System.nanoTime());
         if (randomTime.length() >= 13) {
             int length = randomTime.length();

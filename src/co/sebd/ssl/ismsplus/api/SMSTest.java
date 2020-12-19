@@ -16,31 +16,34 @@ import java.util.*;
  */
 public class SMSTest {
 
-    public static final String API_TOKEN = "35498629-2dc235f";
-    public static final String SID = "";
-    public static final String SID_SE = "";
-
-
     public static void main(String[] args) {
-        System.out.println(RequestedMethod.GET.name());
+        SMSClient client = new SMSClient("93f01bad-5f06-4b52-98be-d17b958458c1", "MY_SID");
+
+
+        // Single SMS Example
+        ReplyResult replyResult1 = client.sendSMS("01717659287", "Test aaa");
+        List<SMSInfo> smsInfoList = replyResult1.getSmsInfoList();
+
+
+        // Dynamic SMS Example
+        Map<String, String> messageMap = new HashMap<>();
+        messageMap.put("01717659287", "Dear Sir Your Due is 1298/- \nPlease Pay");
+        messageMap.put("01945544306", "Dear Sir Your Due is 3200/- \nPlease Pay");
+//        ReplyResult replyResult2 =  client.sendSMS(messageMap);
+//        List<SMSInfo> smsInfoList2 = replyResult2.getSmsInfoList();
+
+        // Dynamic SMS with Signature
+//        replyResult2 =  client.sendSMS(messageMap,"Manager Accounts\nABC Company Ltd.");
+//        smsInfoList2 = replyResult2.getSmsInfoList();
+
+
+
+        // Bulk SMS Example
+//        List<String> cellsBulk = Arrays.asList("01717659287", "01945544306");
+//        ReplyResult replyResult3 = client.sendSMS(cellsBulk, "This is Common SMS for Everyone...");
+
+
     }
 
-
-
-
-
-    public static void sendSMS(RequestedMethod method, List<String> cells, String text) {
-        SMSClient client = new SMSClient(API_TOKEN, SID);
-        ReplyResult result = client.sendSMS(cells, text);
-        System.out.println(result.getLogin());
-        System.out.println(result.getMessage());
-        for (SMSInfo info : result.getSmsInfoList()) {
-            System.out.print(info.getMsiSdn() + ",\t");
-            System.out.print(info.getSmsText() + ",\t");
-            System.out.println(info.getMsiSdnStatus());
-            System.out.println("=========================");
-        }
-
-    }
 
 }
