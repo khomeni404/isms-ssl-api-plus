@@ -6,7 +6,7 @@ https://ismsplus.sslwireless.com/
 
 
 
-        SMSClient client = new SMSClient("4d43d913-4722-4cc3-bc96-d7d6ca9de6ff", "SOFTENGINEBRAND");
+        SMSClient client = new SMSClient("API_Hash_from_ssl_wireless", "YOUR_SID");
 
 
         // Single SMS Example
