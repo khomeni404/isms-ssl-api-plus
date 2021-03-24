@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.*;
 
 import co.sebd.ssl.ismsplus.util.IDGenerator;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +26,7 @@ import org.json.JSONObject;
  * Revision History:
  * ------------------
  */
+
 public class SMSClient {
 
     private static final String ROOT_URL = "https://smsplus.sslwireless.com/api/v3/send-sms";
