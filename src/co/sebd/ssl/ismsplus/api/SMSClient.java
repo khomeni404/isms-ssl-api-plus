@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.*;
 
 import co.sebd.ssl.ismsplus.util.IDGenerator;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -176,9 +175,10 @@ public class SMSClient {
         con.setRequestProperty("Accept", "application/json");
         con.setRequestMethod(RequestedMethod.POST.name());
 
-        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream(), "UTF-8");
         wr.write(parent.toString());
         wr.flush();
+        wr.close();
 
         //display what returns the POST request
         ReplyResult replyResult = new ReplyResult();
