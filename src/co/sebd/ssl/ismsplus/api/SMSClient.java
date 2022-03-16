@@ -42,12 +42,12 @@ public class SMSClient {
 
 
     // Single SMS
-    public ReplyResult sendSMS(String cell, String text) {
+    public synchronized ReplyResult sendSMS(String cell, String text) {
         return sendSMS(Arrays.asList(cell), text);
     }
 
     // Bulk SMS
-    public ReplyResult sendSMS(List<String> cells, String text) {
+    public synchronized ReplyResult sendSMS(List<String> cells, String text) {
         ReplyResult result = new ReplyResult();
         try {
             URL bulkURL = new URL(SMSClient.ROOT_URL + "/bulk");
@@ -105,12 +105,12 @@ public class SMSClient {
     }
 
     // Dynamic SMS : Without Signature
-    public ReplyResult sendSMS(Map<String, String> messageMap) {
+    public synchronized ReplyResult sendSMS(Map<String, String> messageMap) {
         return sendSMS(messageMap, null);
     }
 
     // Dynamic SMS : With Signature
-    public ReplyResult sendSMS(Map<String, String> messageMap, String signature) {
+    public synchronized ReplyResult sendSMS(Map<String, String> messageMap, String signature) {
         ReplyResult result = new ReplyResult();
         try {
             URL url = new URL(SMSClient.ROOT_URL + "/dynamic");
@@ -166,7 +166,7 @@ public class SMSClient {
 
 
     // Posting Request
-    private static ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
+    private static synchronized ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
