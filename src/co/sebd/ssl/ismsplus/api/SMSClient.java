@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import co.sebd.ssl.ismsplus.util.IDGenerator;
@@ -32,12 +33,12 @@ public class SMSClient {
     private static final int BUNDLE_LIMIT = 100;
     private static final String API_STATUS_SUCCESS = "SUCCESS";
     private static final String API_STATUS_FAILED = "FAILED";
-    private static String apiToken;
-    private static String sid;
+    private String apiToken;
+    private String sid;
 
     public SMSClient(String apiToken, String sid) {
-        SMSClient.apiToken = apiToken;
-        SMSClient.sid = sid;
+        this.apiToken = apiToken;
+        this.sid = sid;
     }
 
 
@@ -166,7 +167,7 @@ public class SMSClient {
 
 
     // Posting Request
-    private static synchronized ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
+    private synchronized static ReplyResult sendPost(URL url, JSONObject parent) throws Exception {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
@@ -175,7 +176,7 @@ public class SMSClient {
         con.setRequestProperty("Accept", "application/json");
         con.setRequestMethod(RequestedMethod.POST.name());
 
-        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream(), "UTF-8");
+        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream(), StandardCharsets.UTF_8);
         wr.write(parent.toString());
         wr.flush();
         wr.close();
@@ -186,11 +187,12 @@ public class SMSClient {
         int HttpResult = con.getResponseCode();
         if (HttpResult == HttpURLConnection.HTTP_OK) {
             BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), "UTF-8")
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)
             );
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line);
+                sb.append("\n");
             }
             br.close();
 
@@ -207,7 +209,7 @@ public class SMSClient {
                 }
                 replyResult.setSmsInfoList(smsInfoList);
             } catch (JSONException e) {
-
+                e.printStackTrace();
             }
 
             replyResult.setSuccess(API_STATUS_SUCCESS.equals(status));
@@ -222,46 +224,5 @@ public class SMSClient {
         return replyResult;
     }
 
-
-   /* @Deprecated
-    private static ReplyResult sendPost(List<String> cells, String text) throws Exception {
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(ROOT_URL);
-        String charset = "UTF-8";
-        post.setHeader("User-Agent", USER_AGENT); // add header
-
-        List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-        urlParameters.add(new BasicNameValuePair("api_token", URLEncoder.encode(apiToken, charset)));
-        IDGenerator csmSID = new IDGenerator();
-
-        int index = 0;
-        for (String cell : cells) {
-            String sms = "sms[" + index + "]";
-            urlParameters.add(new BasicNameValuePair(sms + "[0]", cell));
-            urlParameters.add(new BasicNameValuePair(sms + "[1]", text));
-            urlParameters.add(new BasicNameValuePair(sms + "[2]", csmSID.generate()));
-            index++;
-        }
-        urlParameters.add(new BasicNameValuePair("sid", "mak"));
-
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
-
-        HttpResponse response = client.execute(post);
-        System.out.println("\nSending 'POST' request to ROOT_URL : " + ROOT_URL);
-        System.out.println("Post parameters : " + post.getEntity());
-        System.out.println("Response Code : " +
-                response.getStatusLine().getStatusCode());
-
-        BufferedReader rd = new BufferedReader(
-                new InputStreamReader(response.getEntity().getContent()));
-
-        StringBuffer bufferResult = new StringBuffer();
-        String line = "";
-        while ((line = rd.readLine()) != null) {
-            bufferResult.append(line);
-        }
-        return XmlUtil.generateActionResult(bufferResult.toString());
-
-    }*/
 
 }
